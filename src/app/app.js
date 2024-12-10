@@ -24,6 +24,7 @@ app.use(
   cors({
     origin: [
       "https://elegance-makeover-salon.vercel.app",
+      "https://elegancemakeoversalon.web.app",
       "http://localhost:5173",
     ],
     credentials: true,
