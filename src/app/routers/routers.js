@@ -1,6 +1,7 @@
 import express from "express";
 import { isLoggedIn, isSuperAdmin } from "../middlewares/authUser.js";
 import {
+  handleGetUsers,
   handleLoginUser,
   handleRefreshToken,
   handleRegisterUser,
@@ -46,6 +47,7 @@ apiRouter.post(
   isSuperAdmin,
   handleRegisterUser
 );
+apiRouter.get("/users", isLoggedIn, isSuperAdmin, handleGetUsers);
 apiRouter.post("/users/auth-user-login", handleLoginUser);
 apiRouter.get("/users/auth-manage-token", handleRefreshToken);
 

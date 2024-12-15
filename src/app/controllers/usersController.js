@@ -224,3 +224,18 @@ export const handleRefreshToken = async (req, res, next) => {
     next(error);
   }
 };
+
+export const handleGetUsers = async (req, res, next) => {
+  try {
+    const result = await usersCollection.find().toArray();
+    console.log(result);
+
+    res.status(200).send({
+      success: true,
+      message: "Users retrieved successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
