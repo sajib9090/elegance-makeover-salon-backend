@@ -18,7 +18,9 @@ import {
 } from "../controllers/serviceControllers.js";
 import {
   handleCreateEmployee,
+  handleGetEmployee,
   handleGetEmployees,
+  handleHandleAddAdvanceSalary,
   handleRemoveEmployee,
 } from "../controllers/employeeControllers.js";
 import {
@@ -71,7 +73,13 @@ apiRouter.delete(
 
 //employees
 apiRouter.post("/employees/employee-create", isLoggedIn, handleCreateEmployee);
+apiRouter.post(
+  "/employees/employee-advance-salary/:employeeId",
+  isLoggedIn,
+  handleHandleAddAdvanceSalary
+);
 apiRouter.get("/employees", isLoggedIn, handleGetEmployees);
+apiRouter.get("/employees/employee/:employeeId", isLoggedIn, handleGetEmployee);
 apiRouter.delete(
   "/employees/delete/:employeeId",
   isLoggedIn,

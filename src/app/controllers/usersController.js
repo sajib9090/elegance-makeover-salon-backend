@@ -9,6 +9,7 @@ import validator from "validator";
 import crypto from "crypto";
 import createJWT from "../utils/createJWT.js";
 import { jwtAccessToken, jwtRefreshToken } from "../../../important.js";
+import jwt from "jsonwebtoken";
 
 export const handleRegisterUser = async (req, res, next) => {
   try {
@@ -169,7 +170,7 @@ export const handleLoginUser = async (req, res, next) => {
 
     let userObject = { ...loggedInUser, brand };
 
-    const accessToken = await createJWT(userObject, jwtAccessToken, "1d");
+    const accessToken = await createJWT(userObject, jwtAccessToken, "10m");
 
     const refreshToken = await createJWT(userObject, jwtRefreshToken, "7d");
 
@@ -195,6 +196,7 @@ export const handleLoginUser = async (req, res, next) => {
 
 export const handleRefreshToken = async (req, res, next) => {
   const oldRefreshToken = req.cookies.refreshToken;
+
   try {
     if (!oldRefreshToken) {
       throw createError(404, "Refresh token not found. Login first");
@@ -210,7 +212,7 @@ export const handleRefreshToken = async (req, res, next) => {
     const accessToken = await createJWT(
       { user: decodedToken },
       jwtAccessToken,
-      "10m"
+      "10d"
     );
     // Update req.user with the new decoded user information
     req.user = decodedToken.user;
@@ -228,8 +230,7 @@ export const handleRefreshToken = async (req, res, next) => {
 export const handleGetUsers = async (req, res, next) => {
   try {
     const result = await usersCollection.find().toArray();
-    console.log(result);
-
+console.log(result);
     res.status(200).send({
       success: true,
       message: "Users retrieved successfully",

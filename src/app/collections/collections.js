@@ -7,6 +7,9 @@ export const brandsCollection = client.db(db_name).collection("brands");
 export const categoriesCollection = client.db(db_name).collection("categories");
 export const servicesCollection = client.db(db_name).collection("services");
 export const employeesCollection = client.db(db_name).collection("employees");
+export const advanceSalariesCollection = client
+  .db(db_name)
+  .collection("advanceSalaries");
 export const tempCustomersCollection = client
   .db(db_name)
   .collection("temp-customers");
