@@ -29,7 +29,10 @@ export const isSuperAdmin = async (req, res, next) => {
       throw createError(403, "Failed to authenticate. Please login");
     }
 
-    if (decoded?.user?.role !== "super admin") {
+    if (
+      decoded?.user?.role !== "super admin" &&
+      decoded?.role !== "super admin"
+    ) {
       throw createError(403, "You have not right to create admin user");
     }
 

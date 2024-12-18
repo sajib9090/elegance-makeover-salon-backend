@@ -229,12 +229,92 @@ export const handleRefreshToken = async (req, res, next) => {
 
 export const handleGetUsers = async (req, res, next) => {
   try {
-    const result = await usersCollection.find().toArray();
-console.log(result);
+    const result = await usersCollection
+      .find({}, { projection: { password: 0 } })
+      .toArray();
     res.status(200).send({
       success: true,
       message: "Users retrieved successfully",
       data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const handleGetSingleUser = async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    const result = await usersCollection.findOne(
+      { user_id: id },
+      { projection: { password: 0 } }
+    );
+    if (!result) {
+      throw createError(404, "User not found");
+    }
+    res.status(200).send({
+      success: true,
+      message: "User retrieved successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const handleChangePasswordByAuthority = async (req, res, next) => {
+  const { id } = req.params;
+  let { newPassword } = req.body;
+  try {
+    newPassword = newPassword.replace(/\s+/g, "");
+
+    // Check password length
+    if (newPassword.length < 6) {
+      throw createError(400, "Password must be at least 6 characters long");
+    }
+    const existingUser = await usersCollection.findOne({ user_id: id });
+    console.log(id);
+    if (!existingUser) {
+      throw createError(400, "User not found");
+    }
+    // Hash the new password
+    const saltRounds = 10; // Recommended salt value
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    // Update the password field in the database
+    await usersCollection.updateOne(
+      { user_id: id },
+      { $set: { password: hashedPassword } }
+    );
+
+    res.status(200).send({
+      success: true,
+      message: "Password change successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const handleRemoveUserByAuthority = async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const existingUser = await usersCollection.findOne({ user_id: id });
+    if (!existingUser) {
+      throw createError(400, "User not found");
+    }
+
+    const result = await usersCollection.deleteOne({
+      user_id: existingUser?.user_id,
+    });
+
+    if (result?.deletedCount == 0) {
+      throw createError(500, "Something went wrong. please try again");
+    }
+    res.status(200).send({
+      success: true,
+      message: "Removed successfully",
     });
   } catch (error) {
     next(error);

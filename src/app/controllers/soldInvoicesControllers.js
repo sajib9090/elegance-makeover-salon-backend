@@ -9,8 +9,14 @@ import {
 import { ObjectId } from "mongodb";
 
 export const handleCreateSoldInvoice = async (req, res, next) => {
-  const { customer_name, customer_mobile, served_by, total_bill, items } =
-    req.body;
+  const {
+    customer_name,
+    customer_mobile,
+    served_by,
+    total_bill,
+    total_discount,
+    items,
+  } = req.body;
 
   try {
     // Input validations
@@ -22,6 +28,15 @@ export const handleCreateSoldInvoice = async (req, res, next) => {
     if (customer_mobile && !validator.isMobilePhone(customer_mobile, "any"))
       throw createError(400, "Invalid mobile number format");
 
+    // Ensure total_bill and total_discount are numbers
+    const numericTotalBill = Number(total_bill);
+    if (isNaN(numericTotalBill))
+      throw createError(400, "Total bill must be a valid number");
+
+    const numericTotalDiscount = total_discount ? Number(total_discount) : 0; // Default to 0 if not provided
+    if (isNaN(numericTotalDiscount))
+      throw createError(400, "Total discount must be a valid number");
+
     // Generate unique invoice ID
     const generateCode = crypto.randomBytes(16).toString("hex");
     const newInvoice = {
@@ -30,7 +45,8 @@ export const handleCreateSoldInvoice = async (req, res, next) => {
       customer_mobile,
       items,
       served_by,
-      total_bill,
+      total_bill: numericTotalBill,
+      total_discount: numericTotalDiscount,
       createdAt: new Date(),
     };
 
@@ -63,7 +79,6 @@ export const handleCreateSoldInvoice = async (req, res, next) => {
     next(error);
   }
 };
-
 export const handleGetInvoiceById = async (req, res, next) => {
   const { id } = req.params;
   try {

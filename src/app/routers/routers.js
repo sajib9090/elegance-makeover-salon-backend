@@ -1,10 +1,13 @@
 import express from "express";
 import { isLoggedIn, isSuperAdmin } from "../middlewares/authUser.js";
 import {
+  handleChangePasswordByAuthority,
+  handleGetSingleUser,
   handleGetUsers,
   handleLoginUser,
   handleRefreshToken,
   handleRegisterUser,
+  handleRemoveUserByAuthority,
 } from "../controllers/usersController.js";
 import {
   handleCreateCategory,
@@ -28,6 +31,7 @@ import {
   handleDeleteTemporaryCustomerById,
   handleGetTemporaryCustomerById,
   handleGetTemporaryCustomers,
+  handleMarkedAsPaid,
 } from "../controllers/tempCustomerControllers.js";
 import {
   handleChangeOrderLogQuantity,
@@ -50,8 +54,21 @@ apiRouter.post(
   handleRegisterUser
 );
 apiRouter.get("/users", isLoggedIn, isSuperAdmin, handleGetUsers);
+apiRouter.get("/users/user/:id", isLoggedIn, isSuperAdmin, handleGetSingleUser);
 apiRouter.post("/users/auth-user-login", handleLoginUser);
 apiRouter.get("/users/auth-manage-token", handleRefreshToken);
+apiRouter.patch(
+  "/users/password-change-by-authority/:id",
+  isLoggedIn,
+  isSuperAdmin,
+  handleChangePasswordByAuthority
+);
+apiRouter.delete(
+  "/users/delete-user-by-authority/:id",
+  isLoggedIn,
+  isSuperAdmin,
+  handleRemoveUserByAuthority
+);
 
 //categories
 apiRouter.post("/categories/category-create", isLoggedIn, handleCreateCategory);
@@ -102,6 +119,11 @@ apiRouter.delete(
   "/temp-customers/delete/:tempId",
   isLoggedIn,
   handleDeleteTemporaryCustomerById
+);
+apiRouter.patch(
+  "/temp-customers/marked-as-paid/:tempId",
+  isLoggedIn,
+  handleMarkedAsPaid
 );
 
 //temporary order log
