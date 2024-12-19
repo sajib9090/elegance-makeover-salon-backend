@@ -20,3 +20,4 @@ export const tempOrderLogsCollection = client
 export const soldInvoicesCollection = client
   .db(db_name)
   .collection("sold-Invoices");
+export const expensesCollection = client.db(db_name).collection("expenses");
