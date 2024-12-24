@@ -1,6 +1,7 @@
 import {
   advanceSalariesCollection,
   employeesCollection,
+  expensesCollection,
 } from "../collections/collections.js";
 import createError from "http-errors";
 import { validateString } from "../utils/validateString.js";
@@ -255,6 +256,24 @@ export const handleHandleAddAdvanceSalary = async (req, res, next) => {
     if (!result?.insertedId) {
       throw createError(500, "Something went wrong.");
     }
+
+    const generateCode = crypto.randomBytes(16).toString("hex");
+    const newExpense = {
+      expense_id: generateCode,
+      title:
+        existingEmployee?.name +
+        " " +
+        existingEmployee?.mobile +
+        " " +
+        "(Advance)",
+      total_bill: amount,
+      createdAt: new Date(),
+    };
+
+    const response = await expensesCollection.insertOne(newExpense);
+    if (!response?.insertedId)
+      throw createError(500, "Expense creation failed");
+
     res.status(200).send({
       success: true,
       message: "Added successfully",
