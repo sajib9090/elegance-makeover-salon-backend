@@ -320,3 +320,99 @@ export const handleRemoveUserByAuthority = async (req, res, next) => {
     next(error);
   }
 };
+
+export const handleEditBrandInfo = async (req, res, next) => {
+  const { userId } = req.params;
+  const { brand_name, location, district, sub_district, mobile1, mobile2 } =
+    req.body;
+
+  try {
+    const brand = await brandsCollection.findOne();
+
+    if (!brand) {
+      throw createError(400, "Brand not found");
+    }
+
+    const existingUser = await usersCollection.findOne({ user_id: userId });
+    if (!existingUser) {
+      throw createError(400, "Invalid request");
+    }
+
+    // Build the dynamic update object
+    const updateFields = {};
+
+    if (brand_name && brand_name !== undefined) {
+      updateFields.brand_name = validateString(brand_name, "Brand Name", 3, 40);
+    }
+
+    if (location && location !== undefined) {
+      updateFields["address.location"] = validateString(
+        location,
+        "Location",
+        3,
+        50
+      );
+    }
+
+    if (district && district !== undefined) {
+      updateFields["address.district"] = validateString(
+        district,
+        "District",
+        3,
+        30
+      );
+    }
+
+    if (sub_district && sub_district !== undefined) {
+      updateFields["address.sub_district"] = validateString(
+        sub_district,
+        "Sub District",
+        3,
+        30
+      );
+    }
+
+    if (mobile1 && mobile1 !== undefined) {
+      updateFields["contact.mobile1"] = validateString(
+        mobile1,
+        "Mobile1",
+        11,
+        11
+      );
+    }
+
+    if (mobile2 && mobile2 !== undefined) {
+      updateFields["contact.mobile2"] = validateString(
+        mobile2,
+        "Mobile2",
+        11,
+        11
+      );
+    }
+
+    // If no fields are provided, throw an error
+    if (Object.keys(updateFields).length === 0) {
+      throw createError(400, "No fields provided for update");
+    }
+
+    // Update the brand in the database
+    const updatedBrand = await brandsCollection.updateOne(
+      {},
+      { $set: updateFields }
+    );
+
+    if (!updatedBrand.modifiedCount) {
+      throw createError(500, "Failed to update brand information");
+    }
+
+    const brandInfo = await brandsCollection.findOne();
+
+    res.status(200).send({
+      success: true,
+      message: "Brand info updated",
+      data: brandInfo,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

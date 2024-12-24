@@ -2,6 +2,7 @@ import express from "express";
 import { isLoggedIn, isSuperAdmin } from "../middlewares/authUser.js";
 import {
   handleChangePasswordByAuthority,
+  handleEditBrandInfo,
   handleGetSingleUser,
   handleGetUsers,
   handleLoginUser,
@@ -44,7 +45,10 @@ import {
   handleGetInvoiceById,
   handleGetInvoicesByDate,
 } from "../controllers/soldInvoicesControllers.js";
-import { handleAddExpense, handleGetExpensesByDate } from "../controllers/expenseControllers.js";
+import {
+  handleAddExpense,
+  handleGetExpensesByDate,
+} from "../controllers/expenseControllers.js";
 
 export const apiRouter = express.Router();
 
@@ -69,6 +73,11 @@ apiRouter.delete(
   isLoggedIn,
   isSuperAdmin,
   handleRemoveUserByAuthority
+);
+apiRouter.patch(
+  "/users/edit-brand-info/:userId",
+  isLoggedIn,
+  handleEditBrandInfo
 );
 
 //categories
