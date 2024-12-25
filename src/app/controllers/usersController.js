@@ -231,6 +231,7 @@ export const handleGetUsers = async (req, res, next) => {
   try {
     const result = await usersCollection
       .find({}, { projection: { password: 0 } })
+      .sort({ name: 1 })
       .toArray();
     res.status(200).send({
       success: true,
