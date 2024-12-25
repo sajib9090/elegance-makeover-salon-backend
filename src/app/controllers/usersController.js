@@ -116,7 +116,7 @@ export const handleLoginUser = async (req, res, next) => {
       .toLowerCase();
 
     if (usernameOrMobile?.length > 30 || usernameOrMobile?.length < 3) {
-      throw createError(400, "Email, or mobile should be valid");
+      throw createError(400, "Username, or mobile should be valid");
     }
 
     const trimmedPassword = password.replace(/\s/g, "");
@@ -134,7 +134,7 @@ export const handleLoginUser = async (req, res, next) => {
 
     if (!user) {
       return next(
-        createError.BadRequest("Invalid email address, or mobile. Not found")
+        createError.BadRequest("Invalid username, or mobile. Not found")
       );
     }
 
@@ -396,14 +396,7 @@ export const handleEditBrandInfo = async (req, res, next) => {
     }
 
     // Update the brand in the database
-    const updatedBrand = await brandsCollection.updateOne(
-      {},
-      { $set: updateFields }
-    );
-
-    if (!updatedBrand.modifiedCount) {
-      throw createError(500, "Failed to update brand information");
-    }
+    await brandsCollection.updateOne({}, { $set: updateFields });
 
     const brandInfo = await brandsCollection.findOne();
 
@@ -411,6 +404,132 @@ export const handleEditBrandInfo = async (req, res, next) => {
       success: true,
       message: "Brand info updated",
       data: brandInfo,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const handleEditUserInfo = async (req, res, next) => {
+  const user = req.user.user ? req.user.user : req.user;
+  const { name, username, mobile } = req.body;
+
+  try {
+    const existingUser = await usersCollection.findOne({
+      user_id: user?.user_id,
+    });
+    if (!existingUser) {
+      throw createError(400, "Invalid request");
+    }
+
+    const updateFields = {};
+
+    if (name && name !== undefined) {
+      const validatedName = validateString(name, "Name", 3, 40);
+      updateFields.name = validatedName;
+    }
+
+    if (username && username !== undefined) {
+      const validatedUsername = validateString(username, "Username", 3, 40);
+
+      // Check for duplicate username
+      const usernameExists = await usersCollection.findOne({
+        username: validatedUsername,
+        user_id: { $ne: user?.user_id }, // Exclude the current user
+      });
+      if (usernameExists) {
+        throw createError(
+          400,
+          "The username is already in use by another user"
+        );
+      }
+
+      updateFields.username = validatedUsername;
+    }
+
+    if (mobile && mobile !== undefined) {
+      const validatedMobile = validateString(mobile, "Mobile", 11, 11);
+
+      // Check for duplicate mobile
+      const mobileExists = await usersCollection.findOne({
+        mobile: validatedMobile,
+        user_id: { $ne: user?.user_id }, // Exclude the current user
+      });
+      if (mobileExists) {
+        throw createError(
+          400,
+          "The mobile number is already in use by another user"
+        );
+      }
+
+      updateFields.mobile = validatedMobile;
+    }
+
+    if (Object.keys(updateFields).length === 0) {
+      throw createError(400, "No fields provided for update");
+    }
+
+    await usersCollection.updateOne(
+      { user_id: existingUser?.user_id },
+      { $set: updateFields }
+    );
+
+    const userInfo = await usersCollection.findOne({
+      user_id: existingUser?.user_id,
+    });
+
+    res.status(200).send({
+      success: true,
+      message: "User info updated successfully",
+      data: userInfo,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const handleForgotPassword = async (req, res, next) => {
+  const { mobile } = req.params;
+  const { answer, newPassword } = req.body;
+
+  try {
+    // Check if the user exists
+    const existingUser = await usersCollection.findOne({ mobile: mobile });
+    if (!existingUser) {
+      throw createError(404, "User not found");
+    }
+
+    // Validate security question answer
+    if (!answer || answer.toLowerCase() !== "black cat") {
+      throw createError(400, "Incorrect answer to the security question");
+    }
+
+    // Validate new password
+    if (!newPassword) {
+      throw createError(400, "New Password is a required field");
+    }
+
+    const trimmedPassword = newPassword.replace(/\s/g, "");
+    if (trimmedPassword.length < 6 || trimmedPassword.length > 30) {
+      throw createError(
+        400,
+        "Password must be at least 6 characters long and not more than 30 characters long"
+      );
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(trimmedPassword, salt);
+
+    // Update the user's password in the database
+    await usersCollection.updateOne(
+      { mobile: mobile },
+      { $set: { password: hashedPassword } }
+    );
+
+    res.status(200).send({
+      success: true,
+      message: "Password changed successfully",
     });
   } catch (error) {
     next(error);

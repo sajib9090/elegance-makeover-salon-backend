@@ -79,6 +79,7 @@ export const handleCreateSoldInvoice = async (req, res, next) => {
     next(error);
   }
 };
+
 export const handleGetInvoiceById = async (req, res, next) => {
   const { id } = req.params;
   try {

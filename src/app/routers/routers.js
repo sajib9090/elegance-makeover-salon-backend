@@ -3,6 +3,8 @@ import { isLoggedIn, isSuperAdmin } from "../middlewares/authUser.js";
 import {
   handleChangePasswordByAuthority,
   handleEditBrandInfo,
+  handleEditUserInfo,
+  handleForgotPassword,
   handleGetSingleUser,
   handleGetUsers,
   handleLoginUser,
@@ -74,10 +76,12 @@ apiRouter.delete(
   isSuperAdmin,
   handleRemoveUserByAuthority
 );
+apiRouter.patch("/users/edit-user-info", isLoggedIn, handleEditBrandInfo);
+apiRouter.patch("/users/edit-user-info", isLoggedIn, handleEditUserInfo);
 apiRouter.patch(
-  "/users/edit-brand-info/:userId",
+  "/users/forgot-password/:mobile",
   isLoggedIn,
-  handleEditBrandInfo
+  handleForgotPassword
 );
 
 //categories
