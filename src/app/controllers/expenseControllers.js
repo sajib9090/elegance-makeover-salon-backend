@@ -101,3 +101,32 @@ export const handleGetExpensesByDate = async (req, res, next) => {
     next(error);
   }
 };
+
+export const handleRemoveExpense = async (req, res, next) => {
+  const { expenseId } = req.params;
+
+  try {
+    const existingExpense = await expensesCollection.findOne({
+      expense_id: expenseId,
+    });
+
+    if (!existingExpense) {
+      throw createError(404, "Expense not found");
+    }
+
+    const result = await expensesCollection.deleteOne({
+      expense_id: expenseId,
+    });
+
+    if (result?.deletedCount === 0) {
+      throw createError(500, "Something went wrong try again");
+    }
+
+    res.status(200).send({
+      success: true,
+      message: "Expense removed successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
