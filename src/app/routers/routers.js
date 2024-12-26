@@ -28,6 +28,7 @@ import {
   handleGetEmployees,
   handleHandleAddAdvanceSalary,
   handleRemoveEmployee,
+  handleRemoveEmployeeAdvance,
 } from "../controllers/employeeControllers.js";
 import {
   handleCreateTempCustomer,
@@ -115,6 +116,11 @@ apiRouter.delete(
   "/employees/delete/:employeeId",
   isLoggedIn,
   handleRemoveEmployee
+);
+apiRouter.delete(
+  "/employees/delete-advance-salary/:employeeId",
+  isLoggedIn,
+  handleRemoveEmployeeAdvance
 );
 
 //temporary customer

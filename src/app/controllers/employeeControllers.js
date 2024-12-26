@@ -7,6 +7,7 @@ import createError from "http-errors";
 import { validateString } from "../utils/validateString.js";
 import validator from "validator";
 import crypto from "crypto";
+import { client } from "../config/db.js";
 
 export const handleCreateEmployee = async (req, res, next) => {
   const { name, designation, monthly_salary, mobile } = req.body;
@@ -260,6 +261,7 @@ export const handleHandleAddAdvanceSalary = async (req, res, next) => {
     const generateCode = crypto.randomBytes(16).toString("hex");
     const newExpense = {
       expense_id: generateCode,
+      employee_id: employeeId,
       title:
         existingEmployee?.name +
         " " +
@@ -277,6 +279,52 @@ export const handleHandleAddAdvanceSalary = async (req, res, next) => {
     res.status(200).send({
       success: true,
       message: "Added successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const handleRemoveEmployeeAdvance = async (req, res, next) => {
+  const { employeeId } = req.params;
+
+  try {
+    // Check if advance salary exists
+    const existingAdvanceSalary = await advanceSalariesCollection.findOne({
+      employee_id: employeeId,
+    });
+    if (!existingAdvanceSalary) {
+      throw new Error("No advance salary found for the employee");
+    }
+
+    // Check if expense exists
+    const existingExpense = await expensesCollection.findOne({
+      employee_id: employeeId,
+    });
+    if (!existingExpense) {
+      throw new Error("No expense found for the employee");
+    }
+
+    // Remove advance salary
+    const advanceSalaryResult = await advanceSalariesCollection.deleteOne({
+      employee_id: employeeId,
+    });
+
+    // Remove expense
+    const expenseResult = await expensesCollection.deleteOne({
+      employee_id: employeeId,
+    });
+
+    // Check if both deletions succeeded
+    if (!advanceSalaryResult.deletedCount || !expenseResult.deletedCount) {
+      throw new Error(
+        "Failed to delete advance salary or expense. Data may be inconsistent."
+      );
+    }
+
+    res.status(200).send({
+      success: true,
+      message: "Employee advance and expenses removed successfully",
     });
   } catch (error) {
     next(error);
