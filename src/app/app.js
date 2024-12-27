@@ -19,14 +19,39 @@ const limiter = rateLimit({
   },
 });
 
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "https://trusted.cdn.com"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://trusted.cdn.com"],
+        imgSrc: ["'self'", "data:", "https://trusted.cdn.com"],
+        connectSrc: ["'self'", "https://api.trustedsource.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
+      },
+    },
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+    crossOriginEmbedderPolicy: true,
+    crossOriginOpenerPolicy: { policy: "same-origin" },
+    crossOriginResourcePolicy: { policy: "same-origin" },
+    hsts: {
+      maxAge: 63072000, // 2 years
+      includeSubDomains: true,
+      preload: true,
+    },
+    hidePoweredBy: true,
+    noSniff: true,
+    xssFilter: true,
+    frameguard: { action: "deny" },
+  })
+);
 // Middleware setup
 app.use(
   cors({
-    origin: [
-      "https://elegance-makeover-salon.vercel.app",
-      "https://elegancemakeoversalon.web.app",
-      "http://localhost:5173",
-    ],
+    origin: ["https://elegancemakeoversalon.web.app", "http://localhost:5173"],
     credentials: true,
     optionsSuccessStatus: 200,
   })
