@@ -53,18 +53,31 @@ import {
   handleGetExpensesByDate,
   handleRemoveExpense,
 } from "../controllers/expenseControllers.js";
+import {
+  categoryCreationLimiter,
+  employeeCreationLimiter,
+  expenseCreationLimiter,
+  serviceCreationLimiter,
+  soldInvoiceCreationLimiter,
+  temCustomerCreationLimiter,
+  temOrderLogCreationLimiter,
+  userCreationLimiter,
+  userForgotPasswordLimiter,
+  userLoggedInLimiter,
+} from "../rateLimiter/rateLimiter.js";
 
 export const apiRouter = express.Router();
 
 apiRouter.post(
   "/users/created-user",
+  userCreationLimiter,
   isLoggedIn,
   isSuperAdmin,
   handleRegisterUser
 );
 apiRouter.get("/users", isLoggedIn, isSuperAdmin, handleGetUsers);
 apiRouter.get("/users/user/:id", isLoggedIn, isSuperAdmin, handleGetSingleUser);
-apiRouter.post("/users/auth-user-login", handleLoginUser);
+apiRouter.post("/users/auth-user-login", userLoggedInLimiter, handleLoginUser);
 apiRouter.get("/users/auth-manage-token", handleRefreshToken);
 apiRouter.patch(
   "/users/password-change-by-authority/:id",
@@ -82,12 +95,18 @@ apiRouter.patch("/users/edit-brand-info", isLoggedIn, handleEditBrandInfo);
 apiRouter.patch("/users/edit-user-info", isLoggedIn, handleEditUserInfo);
 apiRouter.patch(
   "/users/forgot-password/:mobile",
+  userForgotPasswordLimiter,
   isLoggedIn,
   handleForgotPassword
 );
 
 //categories
-apiRouter.post("/categories/category-create", isLoggedIn, handleCreateCategory);
+apiRouter.post(
+  "/categories/category-create",
+  categoryCreationLimiter,
+  isLoggedIn,
+  handleCreateCategory
+);
 apiRouter.get("/categories", isLoggedIn, handleGetCategories);
 apiRouter.delete(
   "/categories/delete/:categoryId",
@@ -96,7 +115,12 @@ apiRouter.delete(
 );
 
 //services
-apiRouter.post("/services/service-create", isLoggedIn, handleCreateService);
+apiRouter.post(
+  "/services/service-create",
+  serviceCreationLimiter,
+  isLoggedIn,
+  handleCreateService
+);
 apiRouter.get("/services", isLoggedIn, handleGetServices);
 apiRouter.delete(
   "/services/delete/:serviceId",
@@ -105,7 +129,12 @@ apiRouter.delete(
 );
 
 //employees
-apiRouter.post("/employees/employee-create", isLoggedIn, handleCreateEmployee);
+apiRouter.post(
+  "/employees/employee-create",
+  employeeCreationLimiter,
+  isLoggedIn,
+  handleCreateEmployee
+);
 apiRouter.post(
   "/employees/employee-advance-salary/:employeeId",
   isLoggedIn,
@@ -127,6 +156,7 @@ apiRouter.delete(
 //temporary customer
 apiRouter.post(
   "/temp-customers/temp-customer-create",
+  temCustomerCreationLimiter,
   isLoggedIn,
   handleCreateTempCustomer
 );
@@ -150,6 +180,7 @@ apiRouter.patch(
 //temporary order log
 apiRouter.post(
   "/temp-orders-log/temp-order-log-create",
+  temOrderLogCreationLimiter,
   isLoggedIn,
   handleCreateTempOrderLog
 );
@@ -172,6 +203,7 @@ apiRouter.delete(
 //sold invoice
 apiRouter.post(
   "/sold-invoices/sold-invoice-create",
+  soldInvoiceCreationLimiter,
   isLoggedIn,
   handleCreateSoldInvoice
 );
@@ -180,11 +212,15 @@ apiRouter.get(
   isLoggedIn,
   handleGetInvoiceById
 );
-
 apiRouter.get("/sold-invoices", isLoggedIn, handleGetInvoicesByDate);
 
 //expense
-apiRouter.post("/expenses/add-expense", isLoggedIn, handleAddExpense);
+apiRouter.post(
+  "/expenses/add-expense",
+  expenseCreationLimiter,
+  isLoggedIn,
+  handleAddExpense
+);
 apiRouter.get("/expenses", isLoggedIn, handleGetExpensesByDate);
 apiRouter.delete(
   "/expenses/delete-expense/:expenseId",

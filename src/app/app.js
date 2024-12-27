@@ -4,20 +4,9 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import createError from "http-errors";
-import { rateLimit } from "express-rate-limit";
 import { apiRouter } from "./routers/routers.js";
 
 const app = express();
-
-const limiter = rateLimit({
-  windowMs: 1 * 60 * 1000,
-  max: 10,
-  handler: (req, res) => {
-    res
-      .status(429)
-      .json({ success: false, message: "Too many requests, try again later." });
-  },
-});
 
 app.use(
   helmet({
