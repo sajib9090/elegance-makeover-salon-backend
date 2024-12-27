@@ -7,7 +7,6 @@ import createError from "http-errors";
 import { validateString } from "../utils/validateString.js";
 import validator from "validator";
 import crypto from "crypto";
-import { client } from "../config/db.js";
 
 export const handleCreateEmployee = async (req, res, next) => {
   const { name, designation, monthly_salary, mobile } = req.body;
@@ -132,7 +131,6 @@ export const handleGetEmployees = async (req, res, next) => {
       data: employees,
     });
   } catch (error) {
-    console.error("Error in handleGetEmployees:", error);
     next(error);
   }
 };
@@ -212,7 +210,6 @@ export const handleRemoveEmployee = async (req, res, next) => {
         : "Successfully removed employee (no advance salaries found).",
     });
   } catch (error) {
-    console.error("Error in handleRemoveEmployee:", error);
     next(error);
   }
 };

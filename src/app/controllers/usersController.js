@@ -275,7 +275,7 @@ export const handleChangePasswordByAuthority = async (req, res, next) => {
       throw createError(400, "Password must be at least 6 characters long");
     }
     const existingUser = await usersCollection.findOne({ user_id: id });
-    console.log(id);
+
     if (!existingUser) {
       throw createError(400, "User not found");
     }

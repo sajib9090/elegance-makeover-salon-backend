@@ -65,6 +65,10 @@ import {
   userForgotPasswordLimiter,
   userLoggedInLimiter,
 } from "../rateLimiter/rateLimiter.js";
+import {
+  handleGetCustomer,
+  handleGetCustomers,
+} from "../controllers/customerControllers.js";
 
 export const apiRouter = express.Router();
 
@@ -231,3 +235,7 @@ apiRouter.delete(
   isLoggedIn,
   handleRemoveExpense
 );
+
+//customer
+apiRouter.get("/customers", isLoggedIn, handleGetCustomers);
+apiRouter.get("/customers/customer-info/:customerId", handleGetCustomer);
