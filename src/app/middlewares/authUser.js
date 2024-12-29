@@ -43,6 +43,44 @@ export const isSuperAdmin = async (req, res, next) => {
   }
 };
 
+export const isSpecificUser = async (req, res, next) => {
+  try {
+    const incomingToken =
+      req.headers.authorization || req.headers.Authorization;
+
+    if (!incomingToken) {
+      throw createError(401, "Key not found. Please Login First");
+    }
+
+    const token = incomingToken.split(" ")[1];
+
+    if (!token) {
+      throw createError(401, "Token not found. Please Login First");
+    }
+
+    let decoded;
+
+    try {
+      decoded = jwt.verify(token, jwtAccessToken);
+    } catch (error) {
+      throw createError(401, "Unauthorized. Key expired");
+    }
+
+    if (!decoded) {
+      throw createError(403, "Failed to authenticate. Please login");
+    }
+
+    if (decoded?.user?.username !== "sajib" && decoded?.username !== "sajib") {
+      throw createError(403, "You have not right to access this feature");
+    }
+
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return next(error);
+  }
+};
+
 export const isLoggedIn = async (req, res, next) => {
   try {
     const incomingToken =

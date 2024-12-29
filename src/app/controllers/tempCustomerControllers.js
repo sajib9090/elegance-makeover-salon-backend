@@ -128,6 +128,8 @@ export const handleGetTemporaryCustomers = async (req, res, next) => {
       .sort({ createdAt: 1 })
       .toArray();
 
+    
+
     // Send response
     res.status(200).send({
       success: true,

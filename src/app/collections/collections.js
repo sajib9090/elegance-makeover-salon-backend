@@ -21,3 +21,7 @@ export const soldInvoicesCollection = client
   .db(db_name)
   .collection("sold-Invoices");
 export const expensesCollection = client.db(db_name).collection("expenses");
+export const plansCollection = client.db(db_name).collection("plans");
+export const paymentRecordCollection = client
+  .db(db_name)
+  .collection("payment-record");

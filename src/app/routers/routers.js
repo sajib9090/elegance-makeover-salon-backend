@@ -1,5 +1,9 @@
 import express from "express";
-import { isLoggedIn, isSuperAdmin } from "../middlewares/authUser.js";
+import {
+  isLoggedIn,
+  isSpecificUser,
+  isSuperAdmin,
+} from "../middlewares/authUser.js";
 import {
   handleChangePasswordByAuthority,
   handleEditBrandInfo,
@@ -69,6 +73,17 @@ import {
   handleGetCustomer,
   handleGetCustomers,
 } from "../controllers/customerControllers.js";
+import { subscriptionUser } from "../middlewares/subscription.js";
+import {
+  handleGetPlan,
+  handleGetPlans,
+  handleSelectPlan,
+} from "../controllers/planControllers.js";
+import {
+  handleGetPayments,
+  handleIncreaseSubscription,
+  handleRejectPayment,
+} from "../controllers/paymentControllers.js";
 
 export const apiRouter = express.Router();
 
@@ -168,7 +183,12 @@ apiRouter.post(
   isLoggedIn,
   handleCreateTempCustomer
 );
-apiRouter.get("/temp-customers", isLoggedIn, handleGetTemporaryCustomers);
+apiRouter.get(
+  "/temp-customers",
+  isLoggedIn,
+  subscriptionUser,
+  handleGetTemporaryCustomers
+);
 apiRouter.get(
   "/temp-customers/get-single/:id",
   isLoggedIn,
@@ -242,4 +262,24 @@ apiRouter.get(
   "/customers/customer-info/:customerId",
   isLoggedIn,
   handleGetCustomer
+);
+
+//plans
+apiRouter.get("/plans", handleGetPlans);
+apiRouter.get("/plans/plan/:id", handleGetPlan);
+apiRouter.patch("/plans/select-plan/:id", isLoggedIn, handleSelectPlan);
+
+//payments
+apiRouter.get("/payments", isLoggedIn, handleGetPayments);
+apiRouter.patch(
+  "/payments/increase-subscription/:transactionId",
+  isLoggedIn,
+  isSpecificUser,
+  handleIncreaseSubscription
+);
+apiRouter.patch(
+  "/payments/reject-payment",
+  isLoggedIn,
+  isSpecificUser,
+  handleRejectPayment
 );
