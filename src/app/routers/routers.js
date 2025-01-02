@@ -15,6 +15,8 @@ import {
   handleRefreshToken,
   handleRegisterUser,
   handleRemoveUserByAuthority,
+  handleUpdateBrandLogo,
+  handleUpdateUserAvatar,
 } from "../controllers/usersController.js";
 import {
   handleCreateCategory,
@@ -84,6 +86,7 @@ import {
   handleIncreaseSubscription,
   handleRejectPayment,
 } from "../controllers/paymentControllers.js";
+import { upload } from "../middlewares/multer.js";
 
 export const apiRouter = express.Router();
 
@@ -121,6 +124,18 @@ apiRouter.patch(
   userForgotPasswordLimiter,
   isLoggedIn,
   handleForgotPassword
+);
+apiRouter.patch(
+  "/users/update-avatar",
+  upload.single("avatar"),
+  isLoggedIn,
+  handleUpdateUserAvatar
+);
+apiRouter.patch(
+  "/users/update-brand-logo",
+  upload.single("brandLogo"),
+  isLoggedIn,
+  handleUpdateBrandLogo
 );
 
 //categories

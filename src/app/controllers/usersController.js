@@ -10,6 +10,10 @@ import crypto from "crypto";
 import createJWT from "../utils/createJWT.js";
 import { jwtAccessToken, jwtRefreshToken } from "../../../important.js";
 import jwt from "jsonwebtoken";
+import {
+  deleteFromCloudinary,
+  uploadOnCloudinary,
+} from "../utils/cloudinary.js";
 
 export const handleRegisterUser = async (req, res, next) => {
   try {
@@ -230,7 +234,7 @@ export const handleRefreshToken = async (req, res, next) => {
 export const handleGetUsers = async (req, res, next) => {
   try {
     const result = await usersCollection
-      .find({}, { projection: { password: 0 } })
+      .find({ username: { $ne: "sajib" } }, { projection: { password: 0 } })
       .sort({ name: 1 })
       .toArray();
     res.status(200).send({
@@ -531,6 +535,119 @@ export const handleForgotPassword = async (req, res, next) => {
     res.status(200).send({
       success: true,
       message: "Password changed successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const handleUpdateUserAvatar = async (req, res, next) => {
+  const user = req.user.user ? req.user.user : req.user;
+  const bufferFile = req.file.buffer;
+  try {
+    if (!user) {
+      throw createError(400, "User not found. Login Again");
+    }
+
+    if (!bufferFile) {
+      throw createError(400, "Avatar is required");
+    }
+
+    const existingUser = await usersCollection.findOne({
+      user_id: user?.user_id,
+    });
+
+    if (!existingUser) {
+      throw createError(404, "User not found");
+    }
+
+    if (
+      existingUser?.avatar &&
+      existingUser?.avatar?.id &&
+      existingUser?.avatar?.url
+    ) {
+      await deleteFromCloudinary(existingUser.avatar.id);
+    }
+
+    const avatar = await uploadOnCloudinary(bufferFile);
+
+    if (!avatar?.public_id) {
+      a;
+      throw createError(500, "Something went wrong. Avatar not updated");
+    }
+
+    const result = await usersCollection.updateOne(
+      { user_id: existingUser.user_id },
+      { $set: { avatar: { id: avatar?.public_id, url: avatar?.secure_url } } },
+      { returnOriginal: false }
+    );
+    if (result?.modifiedCount === 0) {
+      throw createError(500, "Updated failed");
+    }
+
+    const updatedUser = await usersCollection.findOne(
+      {
+        user_id: existingUser?.user_id,
+      },
+      { projection: { password: 0 } }
+    );
+    res.status(200).send({
+      success: true,
+      message: "Avatar updated",
+      data: updatedUser,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const handleUpdateBrandLogo = async (req, res, next) => {
+  const bufferFile = req.file.buffer;
+
+  try {
+    if (!bufferFile) {
+      throw createError(400, "Brand Logo is required");
+    }
+
+    const existingBrand = await brandsCollection.findOne({});
+
+    if (!existingBrand) {
+      throw createError(404, "Brand not found");
+    }
+
+    if (
+      existingBrand?.brand_logo &&
+      existingBrand?.brand_logo?.id &&
+      existingBrand?.brand_logo?.url
+    ) {
+      await deleteFromCloudinary(existingBrand.brand_logo.id);
+    }
+
+    const brandLogo = await uploadOnCloudinary(bufferFile);
+
+    if (!brandLogo?.public_id) {
+      a;
+      throw createError(500, "Something went wrong. Brand Logo not updated");
+    }
+
+    const result = await brandsCollection.updateOne(
+      {},
+      {
+        $set: {
+          brand_logo: { id: brandLogo?.public_id, url: brandLogo?.secure_url },
+        },
+      },
+      { returnOriginal: false }
+    );
+    if (result?.modifiedCount === 0) {
+      throw createError(500, "Updated failed");
+    }
+
+    const updatedBrand = await brandsCollection.findOne();
+    res.status(200).send({
+      success: true,
+      message: "Brand logo updated",
+      data: updatedBrand,
     });
   } catch (error) {
     next(error);
