@@ -103,3 +103,18 @@ export const expenseCreationLimiter = rateLimit({
     });
   },
 });
+
+export const userAvatarUpdateLimiter = rateLimit({
+  windowMs: 24 * 60 * 60 * 1000, 
+  max: 5, 
+  message: {
+    success: false,
+    message: "Too many requests, try again after 24 hours.",
+  },
+  handler: (req, res) => {
+    res.status(429).json({
+      success: false,
+      message: "Too many requests, try again after 24 hours.",
+    });
+  },
+});

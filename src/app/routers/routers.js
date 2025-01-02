@@ -67,6 +67,7 @@ import {
   soldInvoiceCreationLimiter,
   temCustomerCreationLimiter,
   temOrderLogCreationLimiter,
+  userAvatarUpdateLimiter,
   userCreationLimiter,
   userForgotPasswordLimiter,
   userLoggedInLimiter,
@@ -127,12 +128,14 @@ apiRouter.patch(
 );
 apiRouter.patch(
   "/users/update-avatar",
+  userAvatarUpdateLimiter,
   upload.single("avatar"),
   isLoggedIn,
   handleUpdateUserAvatar
 );
 apiRouter.patch(
   "/users/update-brand-logo",
+  userAvatarUpdateLimiter,
   upload.single("brandLogo"),
   isLoggedIn,
   handleUpdateBrandLogo
