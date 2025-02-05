@@ -25,3 +25,4 @@ export const plansCollection = client.db(db_name).collection("plans");
 export const paymentRecordCollection = client
   .db(db_name)
   .collection("payment-record");
+export const stockCollection = client.db(db_name).collection("stock");

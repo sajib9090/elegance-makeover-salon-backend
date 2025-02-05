@@ -88,6 +88,12 @@ import {
   handleRejectPayment,
 } from "../controllers/paymentControllers.js";
 import { upload } from "../middlewares/multer.js";
+import {
+  handleAddProduct,
+  handleDecreaseStock,
+  handleGetItems,
+  handleIncreaseStock,
+} from "../controllers/stockController.js";
 
 export const apiRouter = express.Router();
 
@@ -300,4 +306,20 @@ apiRouter.patch(
   isLoggedIn,
   isSpecificUser,
   handleRejectPayment
+);
+
+//stock
+apiRouter.post("/stocks/addItem", isLoggedIn, handleAddProduct);
+apiRouter.get("/stocks", isLoggedIn, handleGetItems);
+apiRouter.patch(
+  "/stocks/increase-stock/:id",
+  isLoggedIn,
+  isSuperAdmin,
+  handleIncreaseStock
+);
+apiRouter.patch(
+  "/stocks/decrease-stock/:id",
+  isLoggedIn,
+  isSuperAdmin,
+  handleDecreaseStock
 );
